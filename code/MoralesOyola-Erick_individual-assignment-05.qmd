@@ -183,7 +183,7 @@ taxon abundance
 ### b. Wrangle your data
 
 ```{r}
-#| label: 1B_ostracod_wrangling
+#| label: 1B_ostracod-wrangling
 #| message: false
 #| warning: false
 
@@ -202,7 +202,7 @@ ostracods |>
 ### c. Code your figure 
 
 ```{r}
-#| label: 1C_ostracods_figure
+#| label: 1C_coding-ostracods-figure
 #| message: false
 #| fig-width: 10
 #| fig-height: 6
@@ -237,7 +237,7 @@ ostracods_plot
 ### d. Create a multipanel figure
 
 ```{r}
-#| label: 1D_multipanel_figure
+#| label: 1D_creating-multipanel-figure
 #| message: false
 #| warning: false
 #| fig-width: 14
@@ -315,3 +315,30 @@ salinity
 - Geometry: `geom_point()`
 - Facets: `facet_wrap(~ taxon, scales = "free")`
 
+### b. Wrangle your data 
+
+```{r}
+#| label: 2B_wrangling-abundance-salinity
+
+#Creating a data frame for visualizing abundance as a function of salinity
+taxon_salinity <- aq_ins_clean |>
+  #Filtering out rows without salinity values
+  filter(!is.na(med_sal)) |>
+  #Creating log-transformed abundance and cleaner taxon labels
+  mutate(log_ave_lit = log(ave_lit + 1),
+         taxon_title = str_to_title(str_replace_all(taxon, "_", " "))) |>
+  #Ordering taxa by their maximum log-transformed abundance
+  mutate(taxon_title = fct_reorder(taxon_title,
+                                   log_ave_lit,
+                                   .fun = max,
+                                   .desc = TRUE)) |>
+  #Keeping only the columns needed for the figure and interpretation
+  select(date, site, site_full, taxon_title, ave_lit,
+         log_ave_lit, med_sal)
+
+#Displaying 10 random rows from the salinity-abundance data frame
+taxon_salinity |>
+  slice_sample(n = 10)
+```
+
+### c. Code your figure 
