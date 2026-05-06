@@ -33,6 +33,6 @@ library(patchwork)
 
 ## Rendered output
 
-The rendered key for the code in this repository is here (add link when ready).
+The rendered key for the code in this repository is here (https://github.com/ejmoralesoyola/week-05_spring-2026_aquatic-inverts/blob/main/code/MoralesOyola-Erick_individual-assignment-05.pdf).
 
 The rendered document from class is here (add link when ready).
