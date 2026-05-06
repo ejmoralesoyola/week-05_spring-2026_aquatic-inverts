@@ -197,3 +197,36 @@ ostracods |>
   slice_sample(n = 10)
 ```
 
+### c. Code your figure 
+
+```{r}
+#| label: 1C_visualizing_ostracods
+#| fig-width: 10
+#| fig-height: 6
+
+#Creating an ostracod abundance figure across sites
+ostracods_plot <- ggplot(data = ostracods,
+                         #Setting x-axis to site and y-axis to log-transformed abundance
+                         mapping = aes(x = site_full,
+                                       y = log_ave_lit)) +
+  #Adding jittered points to show individual observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  #Adding larger points to show median ostracod abundance at each site
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "darkgreen") +
+  #Wrapping long site names on the x-axis
+  scale_x_discrete(labels = label_wrap(15)) +
+  #Relabeling axes and adding a title
+  labs(x = "Site",
+       y = "log + 1 transformed average abundance/L",
+       title = "Ostracod abundance across NCOS sites") +
+  #Using a different theme from default
+  theme_bw()
+#Displaying ostracod abundance figure
+ostracods_plot
+```
+
