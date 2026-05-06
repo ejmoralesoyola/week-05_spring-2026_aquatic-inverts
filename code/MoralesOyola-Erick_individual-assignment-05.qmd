@@ -319,6 +319,8 @@ salinity
 
 ```{r}
 #| label: 2B_wrangling-abundance-salinity
+#| message: false
+#| warning: false
 
 #Creating a data frame for visualizing abundance as a function of salinity
 taxon_salinity <- aq_ins_clean |>
@@ -341,4 +343,35 @@ taxon_salinity |>
   slice_sample(n = 10)
 ```
 
-### c. Code your figure 
+### c. Code your figure
+
+```{r}
+#| label: 2C_creating-abundance-salinity-figure
+#| message: false
+#| warning: false
+#| fig-width: 10
+#| fig-height: 8
+
+#Creating a figure showing abundance as a function of salinity by taxon
+ggplot(data = taxon_salinity,
+       #Setting x-axis to salinity, y-axis to abundance, and color to taxon
+       mapping = aes(x = med_sal,
+                     y = log_ave_lit,
+                     color = taxon_title)) +
+  #Adding points to show each taxon observation
+  geom_point(alpha = 0.8) +
+  #Separating each taxon into its own panel with free x- and y-axis scales
+  facet_wrap(~ taxon_title,
+             scales = "free") +
+  #Using non-default colors from the viridis palette
+  scale_color_viridis_d() +
+  #Relabeling axes and adding a clear title
+  labs(x = "Median salinity (ppt)",
+       y = "log + 1 transformed average abundance/L",
+       title = "Aquatic invertebrate abundance across salinity gradients") +
+  #Using a different theme from default
+  theme_bw() +
+  #Removing the legend because each taxon is already labeled by its panel
+  theme(legend.position = "none")
+```
+
