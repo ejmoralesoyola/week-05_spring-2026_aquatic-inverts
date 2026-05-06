@@ -88,7 +88,7 @@ taxon_list_clean <- taxon_list |>
 ```
 
 ```{r}
-#| label: water-quality-cleaning
+#| label: cleaning-water-quality
 #| message: false
 
 #Creating a clean water quality object
@@ -112,7 +112,8 @@ water_quality_clean <- water_quality |>
 ```
 
 ```{r}
-#| label: cleaning-aq-ins
+#| label: cleaning-aquatic-inverts
+#| message: false
 
 #Creating a clean aquatic invertebrate object
 aq_ins_clean <- aq_ins |> 
@@ -166,4 +167,17 @@ aq_ins_clean <- aq_ins |>
   mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
          site_full = fct_rev(site_full))
 ```
+
+# Problems 
+
+## 1. Visualizing differences across sites in major
+taxon abundance
+
+### a. Plan your figure 
+
+- X-Axis: `site_full`
+- Y-Axis: log + 1 transformed average Ostracod abundance per liter
+- Geometry to represent average abundance/L: `geom_jitter()`
+- Geometry to represent medians: `stat_summary()`
+
 
