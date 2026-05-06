@@ -1,0 +1,9 @@
+---
+title: "MoralesOyola-Erick_week-05-classwork"
+author: "Erick Morales Oyola"
+date: "2026-04-27"
+format: pdf
+editor: source
+---
+
+
