@@ -375,3 +375,6 @@ ggplot(data = taxon_salinity,
   theme(legend.position = "none")
 ```
 
+### d. Interpret your figure 
+
+The relationship between abundance and salinity differs across taxa. Copepods show relatively high log-transformed abundance across a wide range of salinity values, including low-salinity sites near 0–10 ppt and higher-salinity sites above 40 ppt, suggesting they occur broadly across the salinity gradient. Ostracods and Cladocerans show stronger abundance at lower salinity values, with the highest points clustered closer to the left side of their panels and lower abundance values appearing at higher salinities. Other taxa, notably Annelida Polychaete as well as Nematode, Diptera Ceratopogonidae, and Diptera Chironomid, mostly have points close to zero across the salinity gradient, so there is not a strong visible relationship between salinity and abundance for those groups. Overall, the faceted plot suggests that salinity may matter more for some taxa than others, but several groups are either rare in the dataset or show mostly low abundance regardless of salinity.
