@@ -1,8 +1,295 @@
 ---
-title: "MoralesOyola-Erick_week-05-classwork"
+title: "Week 5 Classwork: aquatic invertebrates"
+subtitle: "Individual assignment 5"
+date: "2026-05-10"
 author: "Erick Morales Oyola"
-date: "2026-04-27"
-format: pdf
-editor: source
+format: 
+  pdf:
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+         \DefineVerbatimEnvironment{OutputCode}{Verbatim}{breaklines,commandchars=\\\{\}}
+execute:
+  message: false
+  warning: false
 ---
+
+# 1. Set up
+
+## Packages
+
+```{r}
+#| label: packages
+#| message: false
+#| warning: false
+
+#Loading general use and cleaning packages
+library(tidyverse)
+library(here)
+library(janitor)
+library(snakecase)
+
+#Loading package for wrapping long axis labels
+library(scales)
+
+#Loading package for reading Excel files
+library(readxl)
+
+#Loading package for visualizing missing data
+library(naniar)
+
+#Loading package for arranging plots
+library(patchwork)
+```
+
+```{r}
+#| label: data
+#| message: false
+
+#Reading in taxonomic information
+taxon_list <- read_csv(here("data", "taxon_list.csv")) 
+
+#Reading in aquatic invertebrate data
+aq_ins <- read_xlsx(here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+                    sheet = "Aquatic Insects") 
+
+#Reading in site information
+sites <- read_xlsx(here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+                   sheet = "sites")
+
+#Reading in water quality information
+water_quality <- read_xlsx(here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+                           sheet = "Water Quality",
+                           na = c("", "n/a", "N/A", "over", "173+")) 
+```
+
+# 2. Cleaning
+
+```{r}
+#| label: cleaning-ncos-sites-classwork
+#| message: false
+
+#Creating a new object from site information
+ncos_sites <- sites |> 
+  #Filtering to only include NCOS sites sampled quarterly
+  filter(sector == "NCOS" & sampling_frequency == "Quarterly")
+```
+
+```{r}
+#| label: cleaning-taxon-list-classwork
+#| message: false
+
+#Creating a clean taxon list for joining with aquatic invertebrate data
+taxon_list_clean <- taxon_list |> 
+  #Converting taxon names to snake case so they match the aquatic invertebrate columns
+  mutate(verbatim_name = to_any_case(verbatim_name, case = "snake"))
+```
+
+```{r}
+#| label: cleaning-water-quality-classwork1
+#| message: false
+
+#Creating a clean water quality object
+water_quality_clean <- water_quality |> 
+  #Cleaning column names into snake case
+  clean_names() |> 
+  #Keeping only water quality surveys from quarterly NCOS sites
+  semi_join(ncos_sites, by = "site") |> 
+  #Creating a date-site column for joining with aquatic invertebrate data
+  unite("date_site", date, site, remove = TRUE) |> 
+  #Grouping by date-site survey
+  group_by(date_site) |> 
+  #Calculating median pH, salinity, and dissolved oxygen for each survey
+  summarize(med_ph = median(p_h, na.rm = TRUE),
+            med_sal = median(salinity_ppt, na.rm = TRUE),
+            med_do = median(dissolved_oxygen_mg_l, na.rm = TRUE)) |> 
+  #Ungrouping the dataframe
+  ungroup() |> 
+  #Filtering out the salinity outlier identified in class
+  filter(date_site != "2022-08-12_NVBR") 
+```
+
+```{r}
+#| label: cleaning-water-quality-classwork
+#| message: false
+
+#Creating a clean water quality object
+water_quality_clean <- water_quality |> 
+  #Cleaning column names into snake case
+  clean_names() |> 
+  #Keeping only water quality surveys from quarterly NCOS sites
+  semi_join(ncos_sites, by = "site") |> 
+  #Creating a date-site column for joining with aquatic invertebrate data
+  unite("date_site", date, site, remove = TRUE) |> 
+  #Grouping by date-site survey
+  group_by(date_site) |> 
+  #Calculating median pH, salinity, and dissolved oxygen for each survey
+  summarize(med_ph = median(p_h, na.rm = TRUE),
+            med_sal = median(salinity_ppt, na.rm = TRUE),
+            med_do = median(dissolved_oxygen_mg_l, na.rm = TRUE)) |> 
+  #Ungrouping the dataframe
+  ungroup() |> 
+  #Filtering out the salinity outlier identified in class
+  filter(date_site != "2022-08-12_NVBR") 
+```
+
+```{r}
+#| label: cleaning-aquatic-inverts-classwork
+#| message: false
+#| warning: false
+
+#Creating a clean aquatic invertebrate object
+aq_ins_clean <- aq_ins |> 
+  #Cleaning column names into snake case
+  clean_names() |> 
+  #Keeping only sites that occur in the NCOS sites object
+  semi_join(ncos_sites, by = c("site")) |> 
+  #Renaming the vial date column to date
+  rename(date = date_on_vial) |> 
+  #Selecting survey information and focal aquatic invertebrate taxa
+  select(date, sample_type, site,
+         ostracod,
+         copepod,
+         hemiptera_corixidae_boatman,
+         cladocera,
+         nematode,
+         diptera_ceratopogonidae, 
+         annelida_oligochaete,
+         diptera_chironomid,
+         annelida_polychaete) |> 
+  #Keeping only filtered beaker samples
+  filter(sample_type %in% c("FB 250", "FB250")) |> 
+  #Converting taxon columns into long format
+  pivot_longer(cols = ostracod:annelida_polychaete,
+               names_to = "taxon",
+               values_to = "abundance") |> 
+  #Grouping by date, site, and taxon
+  group_by(date, site, taxon) |> 
+  #Calculating average abundance per liter from the 7.5 liter sample volume
+  summarize(ave_lit = sum(abundance, na.rm = TRUE) / 7.5) |> 
+  #Ungrouping the dataframe
+  ungroup() |> 
+  #Creating a date-site column for joining with water quality data
+  unite("date_site", date, site, remove = FALSE) |> 
+  #Joining water quality information to each survey
+  left_join(water_quality_clean, by = c("date_site")) |> 
+  #Joining taxonomic information to each taxon
+  left_join(taxon_list_clean, by = c("taxon" = "verbatim_name")) |> 
+  #Adding full site names for clearer figure labels
+  mutate(site_full = case_when(
+    site == "NVBR" ~ "North of Venoco Bridge",
+    site == "NEC" ~ "South of Venoco Bridge",
+    site == "NMC" ~ "Main Channel",
+    site == "NPB" ~ "South of Phelps Bridge",
+    site == "NPB1" ~ "North of Phelps Bridge",
+    site == "NPB2" ~ "Phelps Road",
+    site == "NWP" ~  "West Pond",
+    site == "NDC" ~ "Devereux Creek"
+  )) |> 
+  #Ordering sites by median salinity so site patterns are easier to compare
+  mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
+         site_full = fct_rev(site_full))
+```
+
+# 3. Visualizing
+
+```{r}
+#| label: missing-values-classwork
+#| message: false
+#| warning: false
+
+#Visualizing missing values across the cleaned aquatic invertebrate dataframe
+gg_miss_var(aq_ins_clean)
+```
+
+```{r}
+#| label: visualizing-salinity-classwork
+#| fig-width: 8
+#| fig-height: 6
+#| message: false
+#| warning: false
+
+#Creating salinity figure from clean aquatic invertebrate data
+salinity <- ggplot(data = aq_ins_clean,
+                   #Setting x-axis to site and y-axis to median salinity
+                   mapping = aes(x = site_full,
+                                 y = med_sal)) +
+  #Adding jittered points to show salinity measurements during each survey
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
+  #Wrapping long site names on the x-axis
+  scale_x_discrete(labels = label_wrap(width = 15)) +
+  #Adding red points to show median salinity at each site
+  stat_summary(fun = median,
+               color = "red",
+               size = 1) +
+  #Relabeling axes and adding a title
+  labs(x = "Site",
+       y = "Median salinity (ppt)",
+       title = "Site salinity") +
+  #Using a different theme from default
+  theme_bw()
+
+#Displaying salinity figure
+salinity
+```
+```{r}
+#| label: copepod-cleaning-classwork
+#| message: false
+#| warning: false
+
+#Creating new object from clean aquatic invertebrate data
+copepods <- aq_ins_clean |>
+  #Filtering to only include copepods
+  filter(taxon == "copepod") |>
+  #Log + 1 transforming average abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1))
+```
+
+```{r}
+#| label: visualizing-copepods-classwork
+#| message: false
+#| warning: false
+#| fig-width: 10
+#| fig-height: 6
+
+#Creating copepod abundance figure across sites
+copepods <- ggplot(data = copepods,
+                   #Setting x-axis to site and y-axis to log-transformed abundance
+                   mapping = aes(x = site_full,
+                                 y = log_ave_lit)) +
+  #Adding jittered points to show individual observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  #Adding blue points to show median copepod abundance at each site
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "blue") +
+  #Wrapping long site names on the x-axis
+  scale_x_discrete(labels = label_wrap(15)) +
+  #Relabeling axes and adding a title
+  labs(x = "Site",
+       y = "log + 1 transformed average abundance/L",
+       title = "Copepods") +
+  #Using a different theme from default
+  theme_bw()
+
+#Displaying copepod abundance figure
+copepods
+
+```
+```{r}
+#| label: site-diff-plots-classwork
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 10
+
+#Combining salinity and copepod abundance figures into one plot
+salinity / copepods
+```
 
