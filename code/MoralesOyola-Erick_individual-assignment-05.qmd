@@ -183,7 +183,7 @@ taxon abundance
 ### b. Wrangle your data
 
 ```{r}
-#| label: 1B_ostracod_cleaning
+#| label: 1B_ostracod_wrangling
 #| message: false
 #| warning: false
 
@@ -202,7 +202,7 @@ ostracods |>
 ### c. Code your figure 
 
 ```{r}
-#| label: 1C_visualizing_ostracods
+#| label: 1C_ostracods_figure
 #| message: false
 #| fig-width: 10
 #| fig-height: 6
@@ -298,3 +298,8 @@ copepods_plot <- ggplot(data = copepods,
 salinity / (copepods_plot | ostracods_plot)
 ```
 
+### e. Interpret your figure 
+
+Copepod and Ostracod abundance differ across sites, but they do not show the exact same site-level pattern. Copepods have the highest median abundance at South of Venoco Bridge, with Devereux Creek and South of Phelps Bridge also showing relatively higher median values. Ostracods, on the other hand, appear highest at South of Phelps Bridge and Devereux Creek. These observations are visible from the larger colored median points in the lower two panels, which are highest at different sites for each taxon.
+
+Ostracod abundance does not appear to increase simply with higher salinity. The highest Ostracod median values occur at South of Phelps Bridge and Devereux Creek, which are both lower-salinity sites compared to North and South of Venoco Bridge in the salinity panel. This suggests that Ostracod abundance may be more significantly shaped by other site-level conditions, or that its relationship with salinity is not as direct as a simple positive relationship.
