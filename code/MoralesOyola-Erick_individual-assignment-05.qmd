@@ -180,4 +180,20 @@ taxon abundance
 - Geometry to represent average abundance/L: `geom_jitter()`
 - Geometry to represent medians: `stat_summary()`
 
+### b. Wrangle your data
+
+```{r}
+#| label: 1B_ostracod_cleaning
+#| message: false
+
+#Creating a new object from clean aquatic invertebrate data
+ostracods <- aq_ins_clean |>
+  #Filtering to only include ostracods
+  filter(taxon == "ostracod") |>
+  #Log + 1 transforming average abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1))
+#Displaying 10 random rows from the ostracod data frame
+ostracods |>
+  slice_sample(n = 10)
+```
 
