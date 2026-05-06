@@ -1,0 +1,21 @@
+---
+title: "Week 5: aquatic invertebrates"
+subtitle: "Individual assignment 5"
+date: "2026-05-10"
+author: "Erick Morales Oyola"
+format: 
+  pdf:
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+         \DefineVerbatimEnvironment{OutputCode}{Verbatim}{breaklines,commandchars=\\\{\}}
+execute:
+  message: false
+  warning: false
+---
+
+# 1. Set up
+
+## Packages
+
