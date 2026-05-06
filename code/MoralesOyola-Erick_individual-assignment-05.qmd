@@ -185,6 +185,7 @@ taxon abundance
 ```{r}
 #| label: 1B_ostracod_cleaning
 #| message: false
+#| warning: false
 
 #Creating a new object from clean aquatic invertebrate data
 ostracods <- aq_ins_clean |>
@@ -192,6 +193,7 @@ ostracods <- aq_ins_clean |>
   filter(taxon == "ostracod") |>
   #Log + 1 transforming average abundance per liter
   mutate(log_ave_lit = log(ave_lit + 1))
+
 #Displaying 10 random rows from the ostracod data frame
 ostracods |>
   slice_sample(n = 10)
@@ -201,6 +203,7 @@ ostracods |>
 
 ```{r}
 #| label: 1C_visualizing_ostracods
+#| message: false
 #| fig-width: 10
 #| fig-height: 6
 
@@ -226,7 +229,72 @@ ostracods_plot <- ggplot(data = ostracods,
        title = "Ostracod abundance across NCOS sites") +
   #Using a different theme from default
   theme_bw()
+
 #Displaying ostracod abundance figure
 ostracods_plot
+```
+
+### d. Create a multipanel figure
+
+```{r}
+#| label: 1D_multipanel_figure
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 12
+
+#Creating salinity figure from clean aquatic invertebrate data
+salinity <- ggplot(data = aq_ins_clean,
+                   #Setting x-axis to site and y-axis to median salinity
+                   mapping = aes(x = site_full,
+                                 y = med_sal)) +
+  #Adding jittered points to show salinity values from each survey
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
+  #Wrapping long site labels on the x-axis
+  scale_x_discrete(labels = label_wrap(width = 15)) +
+  #Adding red points to show median salinity at each site
+  stat_summary(fun = median,
+               color = "red",
+               size = 1) +
+  #Relabeling axes and adding a title
+  labs(x = "Site",
+       y = "Median salinity (ppt)",
+       title = "Site salinity") +
+  #Using a different theme from default
+  theme_bw()
+
+#Creating a clean copepod object from aquatic invertebrate data
+copepods <- aq_ins_clean |>
+  #Filtering to only include copepods
+  filter(taxon == "copepod") |>
+  #Log + 1 transforming average abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1))
+#Creating copepod abundance figure across sites
+copepods_plot <- ggplot(data = copepods,
+                        #Setting x-axis to site and y-axis to log-transformed abundance
+                        mapping = aes(x = site_full,
+                                      y = log_ave_lit)) +
+  #Adding jittered points to show individual observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  #Adding blue points to show median copepod abundance at each site
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "blue") +
+  #Wrapping long site labels on the x-axis
+  scale_x_discrete(labels = label_wrap(15)) +
+  #Relabeling axes and adding a title
+  labs(x = "Site",
+       y = "log + 1 transformed average abundance/L",
+       title = "Copepod abundance across NCOS sites") +
+  #Using a different theme from default
+  theme_bw()
+
+#Combining salinity, copepod, and ostracod figures into one multipanel plot
+salinity / (copepods_plot | ostracods_plot)
 ```
 
