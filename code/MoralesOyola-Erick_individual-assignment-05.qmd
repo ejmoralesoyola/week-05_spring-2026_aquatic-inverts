@@ -313,7 +313,7 @@ salinity
 - Y-Axis: log + 1 transformed average abundance per liter
 - Color: `taxon`
 - Geometry: `geom_point()`
-- Facets: `facet_wrap(~ taxon, scales = "free")`
+- Facets: `facet_wrap(~ taxon_title, scales = "free")`
 
 ### b. Wrangle your data 
 
